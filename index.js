@@ -1,18 +1,25 @@
-const express = require('express')
-const app = express()
+require('dotenv').config();
+const express = require('express');
+const mongoose = require('mongoose');
 const cors = require('cors')
 const bodyParser = require('body-parser')
-const mongoose = require('mongoose')
 const uniqid = require('uniqid'); 
-require('dotenv').config()
+const app = express()
 
 app.use(cors())
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static('public'))
 
 
+// Log to verify the environment variable is loaded
+console.log('MongoDB URI:', process.env.MONGODB_URI);
+
 // Mongoose config
-mongoose.connect(process.env.DB_URI)
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('Successfully connected to MongoDB'))
+  .catch(err => {
+    console.error('connection error: ', err);
+  });
 
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error: "));
@@ -51,7 +58,7 @@ app.get('/api/users', async(req, res) => {
 app.get('/api/users/:_id/logs', async (req, res) => {
   let idInput = req.params._id
 
-  let fromInput = req.query.from ? req.query.from : new Date(1980, 01, 01)
+  let fromInput = req.query.from ? req.query.from : new Date(1980, 1, 1)
   let toInput = req.query.to ? req.query.to : new Date(2100, 10, 10)
   let limitInput = req.query.limit ? req.query.limit : 500
 
